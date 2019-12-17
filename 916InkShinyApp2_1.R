@@ -14,29 +14,7 @@ library(cowplot)
 final_app_df_10.11.19 <- read.xlsx("FinalDF2.xlsx")
 final_app_df_10.11.19$SurveyDate <- convertToDate(final_app_df_10.11.19$SurveyDate)
 response_codes <- read.xlsx("916InkSurveyResponseCodes.xlsx", sheet = 3)
-# Questions <- c("FeelAboutWriting", "HowOftenJournal", "FeelAboutAssignment", "ThinkAboutYourWriting",
-#                "WorryOthersThink", "AskForHelp", "WritingBoring", "WriteMyIdeas", "AfraidWriteForGrade",
-#                "WasteOfTime", "WritingIsFun", "MyStoriesMatter", "FeelAboutReading", "ThinkAboutYourReading",
-#                "FeelAboutSchool", "HomeworkFinished", "LikePeopleAtSchool", "GoodImagination", "UsuallyGiveUp",
-#                "EnjoyMeetingPeople", "PeopleLikeMe", "TryMyBest", "StickWithAssignments", "TalkFeelingsToPeers",
-#                "TalkFeelingsToAdults", "FeelWorried", "FeelMad", "FeelSad", "HowConfident", "ReadyWriteCollege",
-#                "WritingNervous", "CloseToPeopleAtSchool", "HarderOnMyself", "CanGetIntoCollege", "InControl",
-#                "TryBestAtSchool", "CommunicateToPeers", "CommunicateToAdults")
-# final_response_codes <- left_join(as.data.frame(Questions), response_codes[,c("Questions", "Category","ImproveDirection")])
-# final_response_codes$ImproveDirection[29:38] <- c("Improve Up",
-#                                                   "ImproveDown",
-#                                                   "ImproveUp",
-#                                                   "ImproveUp",
-#                                                   "ImproveUp",
-#                                                   "ImproveDown",
-#                                                   "ImproveDown",
-#                                                   "ImproveDown",
-#                                                   "ImproveUp",
-#                                                   "ImproveUp")
 
-
-
-#test <- apply(test,2,function(x){as.numeric(extract_num(x))})
 
 # Define main function
 
@@ -61,6 +39,7 @@ get_pct_change3 <- function(df){
   report
 }
 
+
 # UI
 
 ui <- fluidPage(
@@ -74,42 +53,36 @@ ui <- fluidPage(
                          label = "Grade Level: ",
                          choices = sort(unique(final_app_df_10.11.19$Grade)),
                          inline = TRUE),
-      #                         selected = unique(final_app_df_10.11.19$Grade)),
       actionButton(inputId = "gradeSA",
                    label = "Select All"),
       checkboxGroupInput(inputId = "gender",
                          label = "Gender: ",
                          choices = list("M", "F", "Decline"),
                          inline = TRUE),
-      #                         selected = unique(final_app_df_10.11.19$Gender)),
       actionButton(inputId = "genderSA",
                    label = "Select All"),
       checkboxGroupInput(inputId = "race",
                          label = "RaceEth: ",
                          choices = sort(unique(final_app_df_10.11.19$RaceEth)),
                          inline = TRUE),
-      #                        selected = sort(unique(final_app_df_10.11.19$RaceEth))),
       actionButton(inputId = "raceSA",
                    label = "Select All"),
       checkboxGroupInput(inputId = "language",
                          label = "Primary Language: ",
                          choices = sort(unique(final_app_df_10.11.19$Language)),
                          inline = TRUE),
-      #                        selected = sort(unique(final_app_df_10.11.19$Language))),
       actionButton(inputId = "languageSA",
                    label = "Select All"),
       checkboxGroupInput(inputId = "city",
                          label = "City: ",
                          choices = sort(unique(final_app_df_10.11.19$City)),
                          inline = TRUE),
-      #                        selected = sort(unique(final_app_df_10.11.19$City))),
       actionButton(inputId = "citySA",
                    label = "Select All"),
       checkboxGroupInput(inputId = "programsite",
                          label = "Program Site: ",
                          choices = sort(unique(final_app_df_10.11.19$Program.Site)),
                          inline = TRUE),
-      #                         selected = sort(unique(final_app_df_10.11.19$Program.Site))),
       actionButton(inputId = "programsiteSA",
                    label = "Select All"),
       checkboxGroupInput(inputId = "schoolname",
@@ -118,7 +91,6 @@ ui <- fluidPage(
                          inline = TRUE),
       actionButton(inputId = "schoolnameSA",
                    label = "Select All")
-      #                         selected = sort(unique(final_app_df_10.11.19$SchoolName)))
     ),
     mainPanel(
       tabsetPanel(type = "tabs",
@@ -149,6 +121,7 @@ var myWidth = $(window).width();
               
               });")
 )
+
 
 # Server
 
@@ -277,7 +250,6 @@ server <- function(input, output, session){
   
   reactive_report <- eventReactive(input$update, {
     final_app_df_10.11.19 %>%
-      #      filter(., SurveyDate > as.character(input$TimeRange[1]) & SurveyDate < as.character(input$TimeRange[2])) %>%
       filter(., Grade %in% input$grade) %>%
       filter(., Gender %in% input$gender) %>%
       filter(., RaceEth %in% input$race) %>%
@@ -291,7 +263,6 @@ server <- function(input, output, session){
   })
   reactive_count <- eventReactive(input$update, {
     filtered_df <- final_app_df_10.11.19 %>%
-      #      filter(., SurveyDate > as.character(input$TimeRange[1]) & SurveyDate < as.character(input$TimeRange[2])) %>%
       filter(., Grade %in% input$grade) %>%
       filter(., Gender %in% input$gender) %>%
       filter(., RaceEth %in% input$race) %>%
@@ -302,9 +273,6 @@ server <- function(input, output, session){
     print(paste("*There are ", "<font color=\"#FF0000\"><b>", nrow(filtered_df)/2, "</b></font>", " Inkers in this report."))
   })
   reactive_bars <- eventReactive(reactive_report(), {
-      # if (any(input$grade) < 6 & !any(input$grade %in% c(6:12))){
-      #   ink_report <- ink_report %>% slice(., )
-      # }
     bar_report <- ink_report
     bar_report$Pct.Change <- gsub("%", "", ink_report$Pct.Change)
     bar_report <- bar_report %>%
@@ -361,10 +329,6 @@ server <- function(input, output, session){
       theme_bw() +
       theme(plot.title = element_text(size = 16),
             legend.position = "none")
-    # ggdraw() +
-    #   draw_plot(attitudes_plot, 0, 0.67, 1, 0.5) +
-    #   draw_plot(behavior_plot, 0, 0.33, 1, 0.5) +
-    #   draw_plot(socemot_plot, 0, 0, 1, 0.5)
     plot_grid(attitudes_plot, behavior_plot, socemot_plot, ncol = 3)
   })
   output$report <- 
@@ -422,8 +386,6 @@ server <- function(input, output, session){
      }
    )
 }
-
-
 
 
 shinyApp(ui = ui, server = server)
